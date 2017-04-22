@@ -24,5 +24,10 @@ namespace CoolBreeze
         {
             if (App.ViewModel == null) App.ViewModel = new MainViewModel();
         }
+
+        private async void ViewForecastClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new ForecastPage());
+        }
     }
 }
