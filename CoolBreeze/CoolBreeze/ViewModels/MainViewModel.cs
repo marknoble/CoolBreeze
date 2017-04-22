@@ -20,6 +20,13 @@ namespace CoolBreeze
             this.CurrentConditions = new WeatherInformation();
         }
 
+        private Plugin.Geolocator.Abstractions.Position _location;
+        public Plugin.Geolocator.Abstractions.Position Location
+        {
+            get { return this._location; }
+            set { this.SetProperty(ref this._location, value); }
+        }
+
         private LocationType _locationType;
         public LocationType LocationType
         {
@@ -74,7 +81,19 @@ namespace CoolBreeze
             this.IsBusy = true;
             this.NeedsRefresh = false;
 
-            WeatherInformation results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.CityName, this.CountryCode);
+            WeatherInformation results = null;
+
+            switch (this.LocationType)
+            {
+                case LocationType.Location:
+                    if (this.Location == null) this.Location = await Helpers.LocationHelper.GetCurrentLocationAsync();
+                    results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.Location.Latitude, this.Location.Longitude);
+                    break;
+
+                case LocationType.City:
+                    results = await Helpers.WeatherHelper.GetCurrentConditionsAsync(this.CityName, this.CountryCode);
+                    break;
+            }
 
             this.CurrentConditions.Conditions = results.Conditions;
             this.CurrentConditions.Description = results.Description;
